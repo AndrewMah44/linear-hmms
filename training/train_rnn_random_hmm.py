@@ -1,4 +1,6 @@
-#%%
+import os
+os.environ["JAX_PLATFORMS"] = "cpu"
+
 import time 
 import datetime
 import pickle as pkl
