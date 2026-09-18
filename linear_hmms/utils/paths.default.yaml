@@ -1,0 +1,6 @@
+# Change these to the locations of the Dropbox Data folder on your machine
+# Add to your Github ignore file so that it doesn't override it for others
+
+base_data_dir: /Users/amah/Desktop/Test/
+rnn_data_dir: /Users/amah/Desktop/Test/RNNs
+dataset_dir: /Users/amah/Desktop/Test/Datasets
