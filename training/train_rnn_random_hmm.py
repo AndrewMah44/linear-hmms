@@ -40,57 +40,56 @@ conditions = [(alpha_e, alpha_t, ratio, num_states)
 conditions += [(1, 1, 1, 5)]
 
 # ==== Loop Over Conditions ====
-alpha_e, alpha_t, ratio, num_states = conditions[0]
+for (alpha_e, alpha_t, ratio, num_states) in conditions:
+    # ==== Load data ====
+    paths = load_paths_config()
+    datadir = paths["dataset_dir"] / "RandomHMMs"
+    data_filename = f"RandomHMM_"\
+        + f"{num_states}_{alpha_e}_{alpha_t}_{ratio}.pkl"
+    print(f"Data file: {data_filename}", flush=True)
 
-# ==== Load data ====
-paths = load_paths_config()
-datadir = paths["dataset_dir"] / "RandomHMMs"
-data_filename = f"RandomHMM_"\
-    + f"{num_states}_{alpha_e}_{alpha_t}_{ratio}.pkl"
-print(f"Data file: {data_filename}", flush=True)
+    with open(datadir / data_filename, "rb") as file:
+        (hmm, hmm_params, task_params) = pkl.load(file)
 
-with open(datadir / data_filename, "rb") as file:
-    (hmm, hmm_params, task_params) = pkl.load(file)
+    training_data, validation_data, test_data = generate_hmm_dataset(
+        hmm, hmm_params, dataset_params, task_params)
 
-training_data, validation_data, test_data = generate_hmm_dataset(
-    hmm, hmm_params, dataset_params, task_params)
+    test_filename = (datadir / data_filename).with_stem(
+        f"{(datadir / data_filename).stem}_test"
+        )
+    with open(test_filename, "wb") as file:
+        pkl.dump(test_data, file)
 
-test_filename = (datadir / data_filename).with_stem(
-    f"{(datadir / data_filename).stem}_test"
-    )
-with open(test_filename, "wb") as file:
-    pkl.dump(test_data, file)
+    # ==== Training Parameters ====
+    model_specs = {
+            'model_class': 'Linear',
+            'in_size': task_params['num_classes'],
+            'hidden_size': num_states,
+            'out_size': task_params['num_classes'],
+            'mlp_depth': 0,
+            'num_blocks': 1
+    }
 
-# ==== Training Parameters ====
-model_specs = {
-        'model_class': 'Linear',
-        'in_size': task_params['num_classes'],
-        'hidden_size': num_states,
-        'out_size': task_params['num_classes'],
-        'mlp_depth': 0,
-        'num_blocks': 1
-}
+    # ==== Train 5 independent seeds ====
+    for idx in range(5):
+        seed = int(time.time())
+        model_specs['key'] = jr.PRNGKey(seed)
 
-# ==== Train 5 independent seeds ====
-for idx in range(5):
-    seed = int(time.time())
-    model_specs['key'] = jr.PRNGKey(seed)
+        init_model = StackedLinearRNN(**model_specs)
 
-    init_model = StackedLinearRNN(**model_specs)
+        # == Saving parameters ==
+        savedir = paths['rnn_data_dir'] / task_params['task']
+        savedir.mkdir(parents=True, exist_ok=True)
 
-    # == Saving parameters ==
-    savedir = paths['rnn_data_dir'] / task_params['task']
-    savedir.mkdir(parents=True, exist_ok=True)
+        now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-
-    filename = savedir / (f"{model_specs['model_class']}_"\
-        + f"{data_filename}_" \
-        + f"{dataset_params['num_timesteps']}_{idx}")
-    print(f"Model file: {filename}", flush=True)
-    
-    model, training_loss_history, validation_loss_history = \
-            train_prediction_model(
-            init_model, training_data, validation_data, 
-            task_params, opt_params, model_specs, filename)
+        filename = savedir / (f"{model_specs['model_class']}_"\
+            + f"{data_filename}_" \
+            + f"{dataset_params['num_timesteps']}_{idx}")
+        print(f"Model file: {filename}", flush=True)
+        
+        model, training_loss_history, validation_loss_history = \
+                train_prediction_model(
+                init_model, training_data, validation_data, 
+                task_params, opt_params, model_specs, filename)
 
