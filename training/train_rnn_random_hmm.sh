@@ -40,4 +40,4 @@ if jax.default_backend() != "gpu":
 PY
 
 # Run the script with the array index
-srun --cpu-bind=cores python training/train_rnn_random_hmm.py --i "$SLURM_ARRAY_TASK_ID"
+srun --cpu-bind=cores python train_rnn_random_hmm.py --i "$SLURM_ARRAY_TASK_ID"
