@@ -13,7 +13,7 @@
 # Load your environment
 module --force purge
 module load python
-source ~/venvs/linear_hmms/bin/activate
+source ~/venvs/linear-hmms/bin/activate
 
 # Run the script with the array index
 python3 train_rnn_random_hmm.py --i $SLURM_ARRAY_TASK_ID
