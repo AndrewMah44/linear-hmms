@@ -1,8 +1,8 @@
-# !/bin/bash
-# SBATCH --job-name=rand_hmm
-# SBATCH --output=logs/rand_hmm_%A_%a.out
-# SBATCH --error=logs/rand_hmm_%A_%a.err
-# SBATCH --array=2
+#!/bin/bash
+#SBATCH --job-name=rand_hmm
+#SBATCH --output=logs/rand_hmm_%A_%a.out
+#SBATCH --error=logs/rand_hmm_%A_%a.err
+#SBATCH --array=2
 #SBATCH --partition=gpu
 #SBATCH --gpus-per-task=1
 #SBATCH --constraint=a100
@@ -40,4 +40,4 @@ if jax.default_backend() != "gpu":
 PY
 
 # Run the script with the array index
-srun train_rnn_random_hmm.py --i $SLURM_ARRAY_TASK_ID
+srun --cpu-bind=cores python train_rnn_random_hmm.py --i "$SLURM_ARRAY_TASK_ID"
