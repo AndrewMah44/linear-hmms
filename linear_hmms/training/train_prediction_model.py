@@ -44,15 +44,11 @@ def train_prediction_model(model, training_data, validation_data,
 
     # == Define Training Step == #
     @eqx.filter_jit
-    def pred_loss_func(model, x, y):
-        logits = model(x)
-        return softmax_cross_entropy_with_integer_labels(logits, y).mean()
-    
     def loss_func(model, obs, next_obs):
-            pred_loss = jnp.mean(
-                jax.vmap(pred_loss_func, in_axes=[None, 0, 0])(
-                        model, obs, next_obs))
-            return pred_loss
+        logits = jax.vmap(model)(obs)
+        return softmax_cross_entropy_with_integer_labels(
+            logits, next_obs
+        ).mean()
 
     @eqx.filter_jit
     def training_step(model, obs, next_obs, opt_state):
@@ -127,21 +123,26 @@ def train_prediction_model(model, training_data, validation_data,
 
     training_start_time = time.time()
     while counter < counter_thresh:
-        # Run one epoch
-        epoch_start_time = time.time()
-        trained_model, opt_state, epoch_training_loss = \
-            run_one_training_epoch(model, opt_state, training_key,
-                                train_x, train_y)
-        epoch_end_time = time.time()
-        dt = epoch_end_time - epoch_start_time
+
+        epoch_start_time = time.perf_counter()
+
+        trained_model, opt_state, epoch_training_loss = run_one_training_epoch(
+            model, opt_state, training_key, train_x, train_y
+        )
+        jax.block_until_ready((trained_model, opt_state, epoch_training_loss))
+
+        dt = time.perf_counter() - epoch_start_time
+
+        validation_start_time = time.perf_counter()
+        epoch_validation_loss = float(
+            loss_func(trained_model, validation_x, validation_y)
+        )
+        validation_dt = time.perf_counter() - validation_start_time
+
+        print(f"Training: {dt:.2f}s; validation: {validation_dt:.2f}s")
 
         # Store training
         training_loss_history.append(epoch_training_loss)
-
-        # Calculate epoch validation loss
-        epoch_validation_loss = loss_func(trained_model, 
-                                        validation_x, 
-                                        validation_y)
 
         # if validation loss fails to achieve new minimum:
         # 1. decrease learning rate by a factor of 0.5
