@@ -45,7 +45,7 @@ for (alpha_e, alpha_t, ratio, num_states) in conditions[1:]:
     paths = load_paths_config()
     datadir = paths["dataset_dir"] / "RandomHMMs"
     data_filename = f"RandomHMM_"\
-        + f"{num_states}_{alpha_e:0.2f}_{alpha_t:0.f2}_{ratio:0.1f}.pkl"
+        + f"{num_states}_{alpha_e:0.2f}_{alpha_t:0.2f}_{ratio:0.1f}.pkl"
     print(f"Data file: {data_filename}", flush=True)
 
     with open(datadir / data_filename, "rb") as file:
