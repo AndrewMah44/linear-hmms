@@ -40,12 +40,12 @@ conditions = [(alpha_e, alpha_t, ratio, num_states)
 conditions += [(1, 1, 1, 5)]
 
 # ==== Loop Over Conditions ====
-for (alpha_e, alpha_t, ratio, num_states) in conditions:
+for (alpha_e, alpha_t, ratio, num_states) in conditions[1:]:
     # ==== Load data ====
     paths = load_paths_config()
     datadir = paths["dataset_dir"] / "RandomHMMs"
     data_filename = f"RandomHMM_"\
-        + f"{num_states}_{alpha_e}_{alpha_t}_{ratio}.pkl"
+        + f"{num_states}_{alpha_e:0.2f}_{alpha_t:0.f2}_{ratio:0.1f}.pkl"
     print(f"Data file: {data_filename}", flush=True)
 
     with open(datadir / data_filename, "rb") as file:
