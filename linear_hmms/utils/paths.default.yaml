@@ -2,5 +2,5 @@
 # Add to your Github ignore file so that it doesn't override it for others
 
 base_data_dir: /Users/amah/Desktop/Test/
-rnn_data_dir: /Users/amah/Desktop/Test/RNNs
-dataset_dir: /Users/amah/Desktop/Test/Datasets
+rnn_data_dir: /mnt/home/amah1/ceph/test/RNNs/
+dataset_dir: /mnt/home/amah1/ceph/Datasets/
