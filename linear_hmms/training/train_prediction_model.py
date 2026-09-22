@@ -133,13 +133,9 @@ def train_prediction_model(model, training_data, validation_data,
 
         dt = time.perf_counter() - epoch_start_time
 
-        validation_start_time = time.perf_counter()
         epoch_validation_loss = float(
             loss_func(trained_model, validation_x, validation_y)
         )
-        validation_dt = time.perf_counter() - validation_start_time
-
-        print(f"Training: {dt:.2f}s; validation: {validation_dt:.2f}s")
 
         # Store training
         training_loss_history.append(epoch_training_loss)

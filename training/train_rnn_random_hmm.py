@@ -1,5 +1,5 @@
 import os
-# os.environ["JAX_PLATFORMS"] = "cpu"
+os.environ["JAX_PLATFORMS"] = "cpu"
 
 import time 
 import argparse
